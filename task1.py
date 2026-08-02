@@ -13,51 +13,35 @@ class Homework(Trie):
         if pattern == "":
             return 0
 
-        return self._count_words_with_suffix(self.root, pattern)
+        return self._count_suffix_matches(
+            node=self.root,
+            current_word="",
+            pattern=pattern,
+        )
 
-    def _count_words_with_suffix(self, node, pattern: str) -> int:
-        """
-        Рекурсивно обходить усі вузли Trie
-        та рахує слова із заданим суфіксом.
-        """
+    def _count_suffix_matches(
+        self,
+        node,
+        current_word: str,
+        pattern: str,
+    ) -> int:
         count = 0
 
-        if node.value is not None:
-            word = self._get_word_by_value(node.value)
+        if node.value is not None and current_word.endswith(pattern):
+            count += 1
 
-            if word is not None and word.endswith(pattern):
-                count += 1
-
-        for child in node.children.values():
-            count += self._count_words_with_suffix(child, pattern)
+        for char, child in node.children.items():
+            count += self._count_suffix_matches(
+                node=child,
+                current_word=current_word + char,
+                pattern=pattern,
+            )
 
         return count
 
-    def _get_word_by_value(self, value):
-        """
-        Знаходить слово за значенням, збереженим у Trie.
-        """
-        return self._find_word(self.root, value, "")
-
-    def _find_word(self, node, target_value, current_word):
-        if node.value == target_value:
-            return current_word
-
-        for char, child in node.children.items():
-            found_word = self._find_word(
-                child,
-                target_value,
-                current_word + char,
-            )
-
-            if found_word is not None:
-                return found_word
-
-        return None
-
     def has_prefix(self, prefix) -> bool:
         """
-        Перевіряє, чи існує в Trie хоча б одне слово
+        Повертає True, якщо в Trie є хоча б одне слово
         із заданим префіксом.
         """
         if not isinstance(prefix, str):
